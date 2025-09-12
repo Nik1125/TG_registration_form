@@ -142,7 +142,7 @@
 
                 <div class="form-group">
                     <label class="form-label" for="phone">Телефон *</label>
-                    <input type="tel" id="phone" class="form-input" placeholder="+123 456 789 012" inputmode="tel" required>
+                    <input type="tel" id="phone" class="form-input" placeholder="+48 456 789 012" inputmode="tel" required>
                     <div class="error-message" id="phoneError">Введите корректный номер телефона</div>
                 </div>
 
@@ -184,8 +184,14 @@
 
         // As-you-type форматирование (международный)
         phoneInput.addEventListener('input', (e) => {
-            const raw = e.target.value;
-            const formatter = new AsYouType(); // без фиксированного кода — распознаёт по +...
+            let raw = e.target.value;
+        
+            // если человек начал с цифры, добавим + в начало
+            if (raw.length > 0 && !raw.startsWith('+')) {
+                raw = '+' + raw.replace(/^\+/, '');
+            }
+        
+            const formatter = new AsYouType();
             const formatted = formatter.input(raw);
             e.target.value = formatted;
         });
@@ -264,7 +270,7 @@
 
             // Готовим телефон: E.164 + оригинал
             const phoneParsed = parsePhoneNumberFromString(phoneInput.value);
-            const phoneE164 = phoneParsed ? phoneParsed.number : null; // '+1234567890'
+            const phoneE164 = phoneParsed ? phoneParsed.number : null; // '+484567890'
             const phoneCountry = phoneParsed ? phoneParsed.country : null;
 
             const payload = {
