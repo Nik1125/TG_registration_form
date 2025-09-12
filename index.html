@@ -4,13 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Регистрация</title>
+
+    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- libphonenumber-js (облегчённая, без сборщиков) -->
+    <script src="https://cdn.jsdelivr.net/npm/libphonenumber-js@1.10.53/bundle/libphonenumber-js.min.js"></script>
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -40,13 +42,7 @@
             margin-bottom: 24px;
         }
 
-        .subtitle {
-            display: none;
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
+        .form-group { margin-bottom: 16px; }
 
         .form-label {
             display: block;
@@ -67,9 +63,7 @@
             transition: all 0.3s ease;
         }
 
-        .form-input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
+        .form-input::placeholder { color: rgba(255, 255, 255, 0.5); }
 
         .form-input:focus {
             outline: none;
@@ -108,11 +102,7 @@
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
         }
 
-        .submit-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
+        .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
         .thank-you {
             display: none;
@@ -136,8 +126,8 @@
     <div class="container">
         <div id="registrationForm">
             <h1 class="title">Регистрация</h1>
-            
-            <form id="regForm">
+
+            <form id="regForm" autocomplete="off" novalidate>
                 <div class="form-group">
                     <label class="form-label" for="firstName">Имя *</label>
                     <input type="text" id="firstName" class="form-input" placeholder="Ваше имя" required>
@@ -152,8 +142,8 @@
 
                 <div class="form-group">
                     <label class="form-label" for="phone">Телефон *</label>
-                    <input type="tel" id="phone" class="form-input" placeholder="+48 XXX XXX XXX" required>
-                    <div class="error-message" id="phoneError">Введите корректный польский номер телефона</div>
+                    <input type="tel" id="phone" class="form-input" placeholder="+123 456 789 012" inputmode="tel" required>
+                    <div class="error-message" id="phoneError">Введите корректный номер телефона</div>
                 </div>
 
                 <div class="form-group">
@@ -162,10 +152,7 @@
                     <div class="error-message" id="emailError">Введите корректный email адрес</div>
                 </div>
 
-                <button type="submit" class="submit-btn" id="submitBtn">
-                    Зарегистрироваться
-                </button>
-                
+                <button type="submit" class="submit-btn" id="submitBtn">Зарегистрироваться</button>
                 <div class="loading" id="loading">Отправка данных...</div>
             </form>
         </div>
@@ -176,59 +163,55 @@
     </div>
 
     <script>
-        // Initialize Telegram WebApp
-        let tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
+        // Telegram WebApp init
+        const tg = window.Telegram?.WebApp;
+        if (tg) { tg.ready(); tg.expand(); }
 
-        // Get form elements
+        // Elements
         const form = document.getElementById('regForm');
         const submitBtn = document.getElementById('submitBtn');
         const loading = document.getElementById('loading');
         const registrationForm = document.getElementById('registrationForm');
         const thankYou = document.getElementById('thankYou');
 
-        // Phone number formatting
-        const phoneInput = document.getElementById('phone');
-        phoneInput.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            
-            if (value.startsWith('48')) {
-                value = value.substring(2);
-            }
-            
-            if (value.length > 0) {
-                if (value.length <= 3) {
-                    value = `+ ${value}`;
-                } else if (value.length <= 6) {
-                    value = `+ ${value.substring(0, 2)} ${value.substring(0, 3)} ${value.substring(3)}`;
-                } else {
-                    value = `+ ${value.substring(0, 2)} ${value.substring(0, 3)} ${value.substring(3, 6)} ${value.substring(6, 9)}`;
-                }
-            }
-            
-            e.target.value = value;
+        const firstNameInput = document.getElementById('firstName');
+        const lastNameInput  = document.getElementById('lastName');
+        const phoneInput     = document.getElementById('phone');
+        const emailInput     = document.getElementById('email');
+
+        // === libphonenumber-js helpers ===
+        const { AsYouType, parsePhoneNumberFromString } = libphonenumber;
+
+        // As-you-type форматирование (международный)
+        phoneInput.addEventListener('input', (e) => {
+            const raw = e.target.value;
+            const formatter = new AsYouType(); // без фиксированного кода — распознаёт по +...
+            const formatted = formatter.input(raw);
+            e.target.value = formatted;
         });
 
-        // Validation functions
-        function validateName(name) {
-            return name.trim().length >= 2;
+        // Валидация телефона через libphonenumber
+        function validatePhoneIntl(value) {
+            const phone = parsePhoneNumberFromString(value || '');
+            return phone && phone.isValid();
         }
 
-        function validatePolishPhone(phone) {
-            const phoneRegex = /^\+48\s\d{3}\s\d{3}\s\d{3}$/;
-            return phoneRegex.test(phone);
+        // Прочая валидация
+        function validateName(name) {
+            return (name || '').trim().length >= 2;
         }
 
         function validateEmail(email) {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(email);
+            return emailRegex.test(email || '');
         }
 
+        // UI error helpers
         function showError(fieldId, show = true) {
             const field = document.getElementById(fieldId);
             const error = document.getElementById(fieldId + 'Error');
-            
+            if (!field || !error) return;
+
             if (show) {
                 field.classList.add('error');
                 error.style.display = 'block';
@@ -238,127 +221,83 @@
             }
         }
 
-        // Form validation
+        // Blur validation
+        firstNameInput.addEventListener('blur', function() {
+            if (this.value.trim()) showError('firstName', !validateName(this.value));
+        });
+        lastNameInput.addEventListener('blur', function() {
+            if (this.value.trim()) showError('lastName', !validateName(this.value));
+        });
+        phoneInput.addEventListener('blur', function() {
+            if (this.value.trim()) showError('phone', !validatePhoneIntl(this.value));
+        });
+        emailInput.addEventListener('blur', function() {
+            if (this.value.trim()) showError('email', !validateEmail(this.value));
+        });
+
+        // Полная проверка формы
         function validateForm() {
             let isValid = true;
-            
-            const firstName = document.getElementById('firstName').value;
-            const lastName = document.getElementById('lastName').value;
-            const phone = document.getElementById('phone').value;
-            const email = document.getElementById('email').value;
 
-            // Validate first name
-            if (!validateName(firstName)) {
-                showError('firstName', true);
-                isValid = false;
-            } else {
-                showError('firstName', false);
-            }
+            if (!validateName(firstNameInput.value)) { showError('firstName', true); isValid = false; }
+            else { showError('firstName', false); }
 
-            // Validate last name
-            if (!validateName(lastName)) {
-                showError('lastName', true);
-                isValid = false;
-            } else {
-                showError('lastName', false);
-            }
+            if (!validateName(lastNameInput.value)) { showError('lastName', true); isValid = false; }
+            else { showError('lastName', false); }
 
-            // Validate phone
-            if (!validatePolishPhone(phone)) {
-                showError('phone', true);
-                isValid = false;
-            } else {
-                showError('phone', false);
-            }
+            if (!validatePhoneIntl(phoneInput.value)) { showError('phone', true); isValid = false; }
+            else { showError('phone', false); }
 
-            // Validate email
-            if (!validateEmail(email)) {
-                showError('email', true);
-                isValid = false;
-            } else {
-                showError('email', false);
-            }
+            if (!validateEmail(emailInput.value)) { showError('email', true); isValid = false; }
+            else { showError('email', false); }
 
             return isValid;
         }
 
-        // Form submission
-        form.addEventListener('submit', async function(e) {
+        // Submit
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            if (!validateForm()) {
-                return;
-            }
+            if (!validateForm()) return;
 
-            // Disable form and show loading
             submitBtn.disabled = true;
             loading.style.display = 'block';
 
-            // Prepare data
-            const formData = {
-                firstName: document.getElementById('firstName').value.trim(),
-                lastName: document.getElementById('lastName').value.trim(),
-                phone: document.getElementById('phone').value.trim(),
-                email: document.getElementById('email').value.trim(),
-                tgUserId: tg.initDataUnsafe?.user?.id || null,
-                tgUsername: tg.initDataUnsafe?.user?.username || null,
-                tgFirstName: tg.initDataUnsafe?.user?.first_name || null,
-                tgLastName: tg.initDataUnsafe?.user?.last_name || null
+            // Готовим телефон: E.164 + оригинал
+            const phoneParsed = parsePhoneNumberFromString(phoneInput.value);
+            const phoneE164 = phoneParsed ? phoneParsed.number : null; // '+1234567890'
+            const phoneCountry = phoneParsed ? phoneParsed.country : null;
+
+            const payload = {
+                firstName: firstNameInput.value.trim(),
+                lastName : lastNameInput.value.trim(),
+                phoneOriginal: phoneInput.value.trim(),
+                phoneE164: phoneE164,
+                phoneCountry: phoneCountry,
+                email: emailInput.value.trim(),
+                tgUserId: tg?.initDataUnsafe?.user?.id || null,
+                tgUsername: tg?.initDataUnsafe?.user?.username || null,
+                tgFirstName: tg?.initDataUnsafe?.user?.first_name || null,
+                tgLastName: tg?.initDataUnsafe?.user?.last_name || null
             };
 
             try {
-                const response = await fetch('https://mikin8n.joytides.com/webhook-test/registration', {
+                const resp = await fetch('https://mikin8n.joytides.com/webhook-test/registration', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formData)
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
 
-                if (response.ok) {
-                    // Show thank you message
-                    registrationForm.style.display = 'none';
-                    thankYou.style.display = 'block';
-                    
-                    // Close webapp after 2 seconds
-                    setTimeout(() => {
-                        tg.close();
-                    }, 2000);
-                } else {
-                    throw new Error('Network response was not ok');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Произошла ошибка при отправке данных. Попробуйте еще раз.');
-                
-                // Re-enable form
+                if (!resp.ok) throw new Error('Network response was not ok');
+
+                registrationForm.style.display = 'none';
+                thankYou.style.display = 'block';
+
+                setTimeout(() => { try { tg?.close(); } catch(_){} }, 2000);
+            } catch (err) {
+                console.error(err);
+                alert('Произошла ошибка при отправке данных. Попробуйте ещё раз.');
                 submitBtn.disabled = false;
                 loading.style.display = 'none';
-            }
-        });
-
-        // Real-time validation
-        document.getElementById('firstName').addEventListener('blur', function() {
-            if (this.value.trim()) {
-                showError('firstName', !validateName(this.value));
-            }
-        });
-
-        document.getElementById('lastName').addEventListener('blur', function() {
-            if (this.value.trim()) {
-                showError('lastName', !validateName(this.value));
-            }
-        });
-
-        document.getElementById('phone').addEventListener('blur', function() {
-            if (this.value.trim()) {
-                showError('phone', !validatePolishPhone(this.value));
-            }
-        });
-
-        document.getElementById('email').addEventListener('blur', function() {
-            if (this.value.trim()) {
-                showError('email', !validateEmail(this.value));
             }
         });
     </script>
