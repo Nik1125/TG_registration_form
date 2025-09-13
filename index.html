@@ -120,12 +120,126 @@
             font-size: 14px;
             margin-top: 10px;
         }
+
+        /* Radio and Checkbox Styles */
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .radio-group-horizontal {
+            flex-direction: row;
+            gap: 16px;
+        }
+
+        .radio-group-horizontal .radio-option {
+            flex: 1;
+        }
+
+        .radio-option, .checkbox-option {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 12px;
+            background: rgba(45, 35, 75, 0.6);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .radio-option:hover, .checkbox-option:hover {
+            background: rgba(45, 35, 75, 0.8);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .radio-option input, .checkbox-option input {
+            display: none;
+        }
+
+        .radio-custom, .checkbox-custom {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            margin-right: 12px;
+            position: relative;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .checkbox-custom {
+            border-radius: 4px;
+        }
+
+        .radio-option input:checked + .radio-custom {
+            border-color: #3B82F6;
+            background: #3B82F6;
+        }
+
+        .radio-option input:checked + .radio-custom::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .checkbox-option input:checked + .checkbox-custom {
+            border-color: #3B82F6;
+            background: #3B82F6;
+        }
+
+        .checkbox-option input:checked + .checkbox-custom::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .radio-content {
+            flex: 1;
+        }
+
+        .radio-title {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .radio-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+        }
+
+        .checkbox-option span:last-child {
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        /* Character counter */
+        .char-counter {
+            text-align: right;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
     </style>
 </head>
 <body>
     <div class="container">
         <div id="registrationForm">
-            <h1 class="title">Регистрация</h1>
+            <h1 class="title">Записаться  на консультацию</h1>
 
             <form id="regForm" autocomplete="off" novalidate>
                 <div class="form-group">
@@ -152,7 +266,81 @@
                     <div class="error-message" id="emailError">Введите корректный email адрес</div>
                 </div>
 
-                <button type="submit" class="submit-btn" id="submitBtn">Зарегистрироваться</button>
+                <div class="form-group">
+                    <label class="form-label">Тип консультации *</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="consultationType" value="express" required>
+                            <span class="radio-custom"></span>
+                            <div class="radio-content">
+                                <div class="radio-title">Экспресс-консультация</div>
+                                <div class="radio-subtitle">30 минут</div>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="consultationType" value="full" required>
+                            <span class="radio-custom"></span>
+                            <div class="radio-content">
+                                <div class="radio-title">Полная консультация</div>
+                                <div class="radio-subtitle">1-1,5 часа с разбором ситуации</div>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="error-message" id="consultationTypeError">Выберите тип консультации</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Способ связи *</label>
+                    <div class="radio-group radio-group-horizontal">
+                        <label class="radio-option">
+                            <input type="radio" name="contactMethod" value="phone" required>
+                            <span class="radio-custom"></span>
+                            <div class="radio-content">
+                                <div class="radio-title">Телефон</div>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="contactMethod" value="telegram" required>
+                            <span class="radio-custom"></span>
+                            <div class="radio-content">
+                                <div class="radio-title">Telegram</div>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="error-message" id="contactMethodError">Выберите способ связи</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Формат консультации *</label>
+                    <div class="radio-group radio-group-horizontal">
+                        <label class="radio-option">
+                            <input type="radio" name="consultationFormat" value="online" required>
+                            <span class="radio-custom"></span>
+                            <div class="radio-content">
+                                <div class="radio-title">Онлайн</div>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="consultationFormat" value="offline" required>
+                            <span class="radio-custom"></span>
+                            <div class="radio-content">
+                                <div class="radio-title">Офлайн</div>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="error-message" id="consultationFormatError">Выберите формат консультации</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="consultationTopic">Тема консультации</label>
+                    <input type="text" id="consultationTopic" class="form-input" placeholder="Кратко опишите, о чем хотите поговорить" maxlength="100">
+                    <div class="char-counter">
+                        <span id="charCount">0</span>/100
+                    </div>
+                </div>
+
+
+                <button type="submit" class="submit-btn" id="submitBtn">Записаться на консультацию</button>
                 <div class="loading" id="loading">Отправка данных...</div>
             </form>
         </div>
@@ -178,6 +366,9 @@
         const lastNameInput  = document.getElementById('lastName');
         const phoneInput     = document.getElementById('phone');
         const emailInput     = document.getElementById('email');
+        const consultationTopicInput = document.getElementById('consultationTopic');
+        const charCount = document.getElementById('charCount');
+        // Удаляем старую ссылку на select, теперь используем радиокнопки
 
         // === libphonenumber-js helpers ===
         const { AsYouType, parsePhoneNumberFromString } = libphonenumber;
@@ -212,6 +403,22 @@
             return emailRegex.test(email || '');
         }
 
+        function validateConsultationType() {
+            const selected = document.querySelector('input[name="consultationType"]:checked');
+            return selected !== null;
+        }
+
+        function validateContactMethod() {
+            const selected = document.querySelector('input[name="contactMethod"]:checked');
+            return selected !== null;
+        }
+
+        function validateConsultationFormat() {
+            const selected = document.querySelector('input[name="consultationFormat"]:checked');
+            return selected !== null;
+        }
+
+
         // UI error helpers
         function showError(fieldId, show = true) {
             const field = document.getElementById(fieldId);
@@ -241,6 +448,35 @@
             if (this.value.trim()) showError('email', !validateEmail(this.value));
         });
 
+        // Счетчик символов для темы консультации
+        consultationTopicInput.addEventListener('input', function() {
+            const currentLength = this.value.length;
+            charCount.textContent = currentLength;
+            
+            // Меняем цвет при приближении к лимиту
+            if (currentLength > 80) {
+                charCount.style.color = '#ff6b6b';
+            } else if (currentLength > 60) {
+                charCount.style.color = '#ffa500';
+            } else {
+                charCount.style.color = 'rgba(255, 255, 255, 0.6)';
+            }
+        });
+
+        // Обработчики для новых полей
+        document.querySelectorAll('input[name="contactMethod"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                showError('contactMethod', !validateContactMethod());
+            });
+        });
+
+        document.querySelectorAll('input[name="consultationFormat"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                showError('consultationFormat', !validateConsultationFormat());
+            });
+        });
+
+
         // Полная проверка формы
         function validateForm() {
             let isValid = true;
@@ -256,6 +492,15 @@
 
             if (!validateEmail(emailInput.value)) { showError('email', true); isValid = false; }
             else { showError('email', false); }
+
+            if (!validateConsultationType()) { showError('consultationType', true); isValid = false; }
+            else { showError('consultationType', false); }
+
+            if (!validateContactMethod()) { showError('contactMethod', true); isValid = false; }
+            else { showError('contactMethod', false); }
+
+            if (!validateConsultationFormat()) { showError('consultationFormat', true); isValid = false; }
+            else { showError('consultationFormat', false); }
 
             return isValid;
         }
@@ -273,6 +518,11 @@
             const phoneE164 = phoneParsed ? phoneParsed.number : null; // '+484567890'
             const phoneCountry = phoneParsed ? phoneParsed.country : null;
 
+            // Собираем данные консультации
+            const consultationType = document.querySelector('input[name="consultationType"]:checked')?.value;
+            const contactMethod = document.querySelector('input[name="contactMethod"]:checked')?.value;
+            const consultationFormat = document.querySelector('input[name="consultationFormat"]:checked')?.value;
+
             const payload = {
                 firstName: firstNameInput.value.trim(),
                 lastName : lastNameInput.value.trim(),
@@ -280,6 +530,10 @@
                 phoneE164: phoneE164,
                 phoneCountry: phoneCountry,
                 email: emailInput.value.trim(),
+                consultationType: consultationType,
+                contactMethod: contactMethod,
+                consultationFormat: consultationFormat,
+                consultationTopic: consultationTopicInput.value.trim(),
                 tgUserId: tg?.initDataUnsafe?.user?.id || null,
                 tgUsername: tg?.initDataUnsafe?.user?.username || null,
                 tgFirstName: tg?.initDataUnsafe?.user?.first_name || null,
