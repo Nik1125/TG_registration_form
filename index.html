@@ -249,28 +249,28 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="lastName">Фамилия *</label>
-                    <input type="text" id="lastName" class="form-input" placeholder="Ваша фамилия" required>
+                    <label class="form-label" for="lastName">Фамилия <span style="color: rgba(255, 255, 255, 0.6); font-size: 11px;">(Опционально)</span></label>
+                    <input type="text" id="lastName" class="form-input" placeholder="Ваша фамилия">
                     <div class="error-message" id="lastNameError">Пожалуйста, введите вашу фамилию</div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="phone">Телефон *</label>
-                    <input type="tel" id="phone" class="form-input" placeholder="+48 456 789 012" inputmode="tel" required>
+                    <label class="form-label" for="phone">Телефон <span style="color: rgba(255, 255, 255, 0.6); font-size: 11px;">(Опционально)</span></label>
+                    <input type="tel" id="phone" class="form-input" placeholder="+48 456 789 012" inputmode="tel">
                     <div class="error-message" id="phoneError">Введите корректный номер телефона</div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="email">E-mail *</label>
-                    <input type="email" id="email" class="form-input" placeholder="you@example.com" required>
+                    <label class="form-label" for="email">E-mail <span style="color: rgba(255, 255, 255, 0.6); font-size: 11px;">(Опционально)</span></label>
+                    <input type="email" id="email" class="form-input" placeholder="you@example.com">
                     <div class="error-message" id="emailError">Введите корректный email адрес</div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Тип консультации *</label>
+                    <label class="form-label">Тип консультации <span style="color: rgba(255, 255, 255, 0.6); font-size: 11px;">(Опционально)</span></label>
                     <div class="radio-group">
                         <label class="radio-option">
-                            <input type="radio" name="consultationType" value="express" required>
+                            <input type="radio" name="consultationType" value="express">
                             <span class="radio-custom"></span>
                             <div class="radio-content">
                                 <div class="radio-title">Экспресс-консультация</div>
@@ -278,7 +278,7 @@
                             </div>
                         </label>
                         <label class="radio-option">
-                            <input type="radio" name="consultationType" value="full" required>
+                            <input type="radio" name="consultationType" value="full">
                             <span class="radio-custom"></span>
                             <div class="radio-content">
                                 <div class="radio-title">Полная консультация</div>
@@ -332,8 +332,9 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="consultationTopic">Тема консультации</label>
-                    <input type="text" id="consultationTopic" class="form-input" placeholder="Кратко опишите, о чем хотите поговорить" maxlength="100">
+                    <label class="form-label" for="consultationTopic">Тема консультации *</label>
+                    <input type="text" id="consultationTopic" class="form-input" placeholder="Кратко опишите, о чем хотите поговорить" maxlength="100" required>
+                    <div class="error-message" id="consultationTopicError">Пожалуйста, укажите тему консультации</div>
                     <div class="char-counter">
                         <span id="charCount">0</span>/100
                     </div>
@@ -404,8 +405,8 @@
         }
 
         function validateConsultationType() {
-            const selected = document.querySelector('input[name="consultationType"]:checked');
-            return selected !== null;
+            // Теперь тип консультации необязателен
+            return true;
         }
 
         function validateContactMethod() {
@@ -447,6 +448,9 @@
         emailInput.addEventListener('blur', function() {
             if (this.value.trim()) showError('email', !validateEmail(this.value));
         });
+        consultationTopicInput.addEventListener('blur', function() {
+            if (this.value.trim()) showError('consultationTopic', !validateConsultationTopic(this.value));
+        });
 
         // Счетчик символов для темы консультации
         consultationTopicInput.addEventListener('input', function() {
@@ -477,30 +481,49 @@
         });
 
 
+        // Валидация темы консультации
+        function validateConsultationTopic(topic) {
+            return (topic || '').trim().length >= 3;
+        }
+
         // Полная проверка формы
         function validateForm() {
             let isValid = true;
 
+            // Обязательные поля
             if (!validateName(firstNameInput.value)) { showError('firstName', true); isValid = false; }
             else { showError('firstName', false); }
-
-            if (!validateName(lastNameInput.value)) { showError('lastName', true); isValid = false; }
-            else { showError('lastName', false); }
-
-            if (!validatePhoneIntl(phoneInput.value)) { showError('phone', true); isValid = false; }
-            else { showError('phone', false); }
-
-            if (!validateEmail(emailInput.value)) { showError('email', true); isValid = false; }
-            else { showError('email', false); }
-
-            if (!validateConsultationType()) { showError('consultationType', true); isValid = false; }
-            else { showError('consultationType', false); }
 
             if (!validateContactMethod()) { showError('contactMethod', true); isValid = false; }
             else { showError('contactMethod', false); }
 
             if (!validateConsultationFormat()) { showError('consultationFormat', true); isValid = false; }
             else { showError('consultationFormat', false); }
+
+            if (!validateConsultationTopic(consultationTopicInput.value)) { showError('consultationTopic', true); isValid = false; }
+            else { showError('consultationTopic', false); }
+
+            // Опциональные поля - проверяем только если заполнены
+            if (lastNameInput.value.trim() && !validateName(lastNameInput.value)) {
+                showError('lastName', true);
+                isValid = false;
+            } else {
+                showError('lastName', false);
+            }
+
+            if (phoneInput.value.trim() && !validatePhoneIntl(phoneInput.value)) {
+                showError('phone', true);
+                isValid = false;
+            } else {
+                showError('phone', false);
+            }
+
+            if (emailInput.value.trim() && !validateEmail(emailInput.value)) {
+                showError('email', true);
+                isValid = false;
+            } else {
+                showError('email', false);
+            }
 
             return isValid;
         }
