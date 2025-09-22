@@ -340,6 +340,11 @@
                     </div>
                 </div>
 
+                <div class="form-group">
+                    <label class="form-label" for="preferredTime">Предпочтительное время <span style="color: rgba(255, 255, 255, 0.6); font-size: 11px;">(Опционально)</span></label>
+                    <input type="text" id="preferredTime" class="form-input" placeholder="Например: утром, вечером, после 18:00" maxlength="50">
+                    <div class="error-message" id="preferredTimeError">Пожалуйста, укажите корректное время</div>
+                </div>
 
                 <button type="submit" class="submit-btn" id="submitBtn">Оправить</button>
                 <div class="loading" id="loading">Отправка данных...</div>
@@ -368,6 +373,7 @@
         const phoneInput     = document.getElementById('phone');
         const emailInput     = document.getElementById('email');
         const consultationTopicInput = document.getElementById('consultationTopic');
+        const preferredTimeInput = document.getElementById('preferredTime');
         const charCount = document.getElementById('charCount');
         // Удаляем старую ссылку на select, теперь используем радиокнопки
 
@@ -451,6 +457,9 @@
         consultationTopicInput.addEventListener('blur', function() {
             if (this.value.trim()) showError('consultationTopic', !validateConsultationTopic(this.value));
         });
+        preferredTimeInput.addEventListener('blur', function() {
+            if (this.value.trim()) showError('preferredTime', !validatePreferredTime(this.value));
+        });
 
         // Счетчик символов для темы консультации
         consultationTopicInput.addEventListener('input', function() {
@@ -484,6 +493,11 @@
         // Валидация темы консультации
         function validateConsultationTopic(topic) {
             return (topic || '').trim().length >= 3;
+        }
+
+        // Валидация предпочтительного времени
+        function validatePreferredTime(time) {
+            return (time || '').trim().length >= 2;
         }
 
         // Полная проверка формы
@@ -525,6 +539,13 @@
                 showError('email', false);
             }
 
+            if (preferredTimeInput.value.trim() && !validatePreferredTime(preferredTimeInput.value)) {
+                showError('preferredTime', true);
+                isValid = false;
+            } else {
+                showError('preferredTime', false);
+            }
+
             return isValid;
         }
 
@@ -557,6 +578,7 @@
                 contactMethod: contactMethod,
                 consultationFormat: consultationFormat,
                 consultationTopic: consultationTopicInput.value.trim(),
+                preferredTime: preferredTimeInput.value.trim(),
                 tgUserId: tg?.initDataUnsafe?.user?.id || null,
                 tgUsername: tg?.initDataUnsafe?.user?.username || null,
                 tgFirstName: tg?.initDataUnsafe?.user?.first_name || null,
