@@ -3,7 +3,7 @@ export default async function handler(req, res) {
 
   try {
     const webhookUrl = process.env.N8N_WEBHOOK_URL; // секрет в Vercel env
-    const webhookToken = process.env.N8N_WEBHOOK_TOKEN; // опционально
+    //const webhookToken = process.env.N8N_WEBHOOK_TOKEN; // опционально
 
     if (!webhookUrl) {
       return res.status(500).json({ error: 'Webhook URL not configured' });
